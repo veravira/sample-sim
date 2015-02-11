@@ -36,13 +36,21 @@ a5 = foreach a4 generate $0 as item, $1 as count, flatten($2);
 a6 = foreach a5 generate *;
 bb = join a5 by $2, a6 by $2;  
 b1 = filter bb by ($0<$3);
---store b1  into 'b1';
+b1Enrich = foreach b1 generate $0 as item1, $1 as c1, $3 as item2, $4 as c2, 1 as intersect ,SQRT($1*$4) as bot;
+--store b1Enrich into 'b1Enrich1';
 
-b2 = foreach b1 generate $0 as item1, $3 as item2, $1 as c1, $4 as c2, SQRT($1*$4) as bot;
-b3 = group b2 by ($0,$1);
+
+b3 = group b1Enrich by ($0,$2);
 b3D = distinct b3;
 
-b4 = foreach b3D generate $0, COUNT($1) AS top, flatten($1.$4);
+--store b3D into 'b3D1';
+
+
+b4 = foreach b3D generate $0, COUNT($1.$0) AS top, flatten($1.$5) as bot;
+
+
 b = distinct b4;
-result = foreach b generate $0, (double)(top-1)/bot;
-store result into 'result'; 
+result = foreach b generate $0, (double)(top)/bot;
+store result into 'resultFinal'; 
+
+
