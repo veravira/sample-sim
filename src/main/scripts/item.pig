@@ -11,14 +11,14 @@ define SetIntersect datafu.pig.sets.SetIntersect();
 --6410	69195
 
 A = LOAD '$filename' USING PigStorage('\t') as (id:int, item:int);
-
-ids = FOREACH (GROUP A BY id) GENERATE
+B = distinct A;
+ids = FOREACH (GROUP B BY id) GENERATE
   group as id,
-  CountEach(A.(id)) as num_of_items_in_id;
+  CountEach(B.(id)) as num_of_items_in_id;
 
-items = FOREACH (GROUP A BY item) GENERATE
+items = FOREACH (GROUP B BY item) GENERATE
   group as item,
-  CountEach(A.(item)) as num_of_ids,  A.(id) as ids;
+  CountEach(B.(item)) as num_of_ids,  B.(id) as ids;
 a = foreach items generate $0, $1.$1, $2;
 
 
@@ -43,7 +43,7 @@ b1Enrich = foreach b1 generate $0 as item1, $1 as c1, $3 as item2, $4 as c2, 1 a
 b3 = group b1Enrich by ($0,$2);
 b3D = distinct b3;
 
---store b3D into 'b3D1';
+store b3D into 'feb11/b3D1';
 
 
 b4 = foreach b3D generate $0, COUNT($1.$0) AS top, flatten($1.$5) as bot;
@@ -51,6 +51,6 @@ b4 = foreach b3D generate $0, COUNT($1.$0) AS top, flatten($1.$5) as bot;
 
 b = distinct b4;
 result = foreach b generate $0, (double)(top)/bot;
-store result into 'resultFinal'; 
+store result into 'feb11/resultFinal'; 
 
 
